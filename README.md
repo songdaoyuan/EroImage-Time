@@ -3,5 +3,5 @@
 
 ## TODO
 ui.py
-spider.py
-main.py
+spidercore.py
+
