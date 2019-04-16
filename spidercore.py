@@ -20,21 +20,33 @@ r = psession.get(PixivMaleLikeLogin, headers=header)
 content = r.content.decode('utf-8')
 postkey = re.findall(r"<input.+?name=\"post_key\".+?>",
                      content)[0].split(" ")[3].split("\"")[1]
-print(postkey)
 pdata = {
-    'pixiv_id': '',
-    'password': '',
+    'pixiv_id': '953801092@qq.com',
+    'password': 'sdy2000317421',
     'return_to': 'http://www.pixiv.net/',
     'post_key': postkey
 }
 r = psession.post(PixivLogin_api, headers=header, data=pdata)
-print(r.status_code)
-r = psession.get(PixivMakleLike_R18, headers=header)
-print(r.status_code)
-print(psession.cookies)
-html = r.content.decode('utf-8')
-soup = BeautifulSoup(html, 'lxml')
-with open('cache.html', 'w', encoding='utf-8') as f:
-    f.write(soup.prettify())
+if  r.status_code == 200:
+    r = psession.get(PixivMakleLike_R18, headers=header)
+    html = r.content.decode('utf-8') 
+    soup = BeautifulSoup(html, 'lxml') #一页提供了40张色图 
+    '''
+    <a class="work _work " href="/member_illust.php?mode=medium&amp;illust_id=74191839" target="_blank">
+    <a class="work _work multiple " href="/member_illust.php?mode=medium&amp;illust_id=74184804" target="_blank">
+    '''
+    work_list = []
+    i = 0
+    for w,wm in zip(soup.find_all(name='a', attrs={"class": "work _work "}), soup.find_all(name='a', attrs={"class": "work _work multiple "})):
+        #print(w.attrs['href'])
+        work_list.append(w.attrs['href'])
+        #print(wm.attrs['href'])
+        work_list.append(wm.attrs['href']) 
+        '''work_list.append(w.attrs['href'])
+        work_list.append(wm.attrs['href'])'''
+    work_list = list(map(lambda x: 'https://www.pixiv.net/' + x, work_list))
+    print(work_list)
+else:
+    print('Connect to Pixiv Failed! Please check your proxy.')
 
 EhNon_nudeCosplay = r'https://e-hentai.org/?f_cats=959&f_search=non-nude&advsearch=1&f_sname=on&f_stags=on&f_sr=on&f_srdd=4&f_spf=&f_spt='
