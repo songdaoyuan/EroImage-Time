@@ -36,8 +36,8 @@ content = r.content.decode('utf-8')
 postkey = re.findall(r"<input.+?name=\"post_key\".+?>",
                      content)[0].split(" ")[3].split("\"")[1]
 pdata = {
-    'pixiv_id': '953801092@qq.com',
-    'password': 'sdy2000317421',
+    'pixiv_id': '',
+    'password': '',
     'return_to': 'http://www.pixiv.net/',
     'post_key': postkey
 }
