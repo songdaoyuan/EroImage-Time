@@ -4,16 +4,27 @@
 import os
 import re
 
+import socket
+import socks
 import requests
 from bs4 import BeautifulSoup
 
-proxyon = False
+proxyon = True
 
 PixivMaleLike = 'https://www.pixiv.net/ranking.php?mode=male'
 PixivMakleLike_R18 = 'https://www.pixiv.net/ranking.php?mode=male_r18'
-PixivMaleLikeLogin = r'https://accounts.pixiv.net/login?return_to=http%3A%2F%2Fwww.pixiv.net%2Franking.php%3Fmode%3Dmale&source=pc&view_type=page'
+PixivMaleLikeLogin = 'https://accounts.pixiv.net'
 PixivLogin_api = 'https://accounts.pixiv.net/api/login?lang=zh'
+#/login?return_to=http%3A%2F%2Fwww.pixiv.net%2Franking.php%3Fmode%3Dmale&source=pc&view_type=page
+#Proxy method 0
+def enableproxy(bool):
+    if bool:
+        socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 1080)
+        socket.socket = socks.socksocket
 
+'''
+#Proxy Way 1
+#NOT WORK SOMETIMES
 def enableproxy(bool):
     proxie = {
         'http': 'socks5://127.0.0.1:1080',
@@ -24,14 +35,23 @@ def enableproxy(bool):
     else:
         proxie = {}
         return proxie
+'''
+
+enableproxy(proxyon)
 
 header = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/67.0',
-    'Referer': 'https://www.pixiv.net/'
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
+    'Referer': 'https://www.pixiv.net/',
+    'Host': 'www.pixiv.net',
+    'Connection': 'keep-alive',
+    'TE': 'Trailers'
 }
 
+print(requests.get('http://ifconfig.me/ip').text)
 psession = requests.session()  # psession.cookies
-r = psession.get(PixivMaleLikeLogin, headers=header, proxies = enableproxy(proxyon))
+r = psession.get(PixivMaleLikeLogin, headers=header) #add this attr if you use  proxy method 1: proxies = enableproxy(proxyon)
 content = r.content.decode('utf-8')
 postkey = re.findall(r"<input.+?name=\"post_key\".+?>",
                      content)[0].split(" ")[3].split("\"")[1]
@@ -43,7 +63,7 @@ pdata = {
 }
 r = psession.post(PixivLogin_api, headers=header, data=pdata)
 if  r.status_code == 200:
-    r = psession.get(PixivMakleLike_R18, headers=header, proxies = enableproxy(proxyon))
+    r = psession.get(PixivMakleLike_R18, headers=header) #add this attr if you use  proxy method 1: proxies = enableproxy(proxyon)
     html = r.content.decode('utf-8') 
     soup = BeautifulSoup(html, 'lxml') #一页提供了40张色图 
     '''
